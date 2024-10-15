@@ -25,7 +25,9 @@ def sendfiles(newfiles, source):
             return []
         
         contents = open(os.path.join(source, f),"r").read()
-        
+
+        if contents == "":
+            contents = f"\0"
         client.send(f"{contents}".encode())
         print(f"Sent contents of {contents}\n\n")
         server_msg = client.recv(4096).decode()

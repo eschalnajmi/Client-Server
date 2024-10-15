@@ -30,9 +30,9 @@ def connect(destination,addedfiles):
             client.send("Success".encode())
 
             contents = client.recv(4096).decode()
-            if contents == "": 
-                print("no contents")
-                file.close()
+            if contents != f"\0":
+                file.write(contents)
+            file.close()
             print(f"Written contents {filename}")
             client.send("Success".encode())
 
