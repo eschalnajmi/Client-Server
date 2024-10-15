@@ -3,3 +3,4 @@ dest/*
 .DS_STORE
 .*
 !.gitignore
+__pycache__
