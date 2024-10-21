@@ -35,6 +35,16 @@ def RunServer(destination, addedfiles, client, addr):
     while True:
         filename = client.recv(4096).decode()
         if filename == "": break
+
+        if "/" in filename:
+            tempdestination = destination
+            dirs = filename.split("/")
+            for d in dirs[:-1]:
+                tempdestination = os.path.join(tempdestination, d)
+                if not(os.path.exists(tempdestination)):
+                    os.mkdir(tempdestination)
+                    print(f"Created directory {tempdestination}\n\n")
+
         file = open(os.path.join(destination, filename),"w")
         client.send("Success".encode())
 
@@ -51,7 +61,9 @@ def RunServer(destination, addedfiles, client, addr):
                 break
         
         file.write(contents)
+        file.flush()
         file.close()
+        
         client.send("Success".encode())
 
         addedfiles.append(filename)
