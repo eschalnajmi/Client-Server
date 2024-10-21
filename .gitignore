@@ -1,5 +1,5 @@
 test/*
-dest/*
+destination/*
 .DS_STORE
 .*
 !.gitignore
