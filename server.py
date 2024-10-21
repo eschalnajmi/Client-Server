@@ -43,7 +43,6 @@ def connect(destination,addedfiles):
             file.close()
             client.send("Success".encode())
 
-            print(f"Received file {filename}\n\n")
             addedfiles.append(filename)
 
         client.close()
