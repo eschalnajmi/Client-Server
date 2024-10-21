@@ -10,6 +10,7 @@ def getdir():
     '''
     if len(sys.argv) < 2:
         source = os.getcwd()
+        os.chdir("../")
         return source
     
     return sys.argv[1]
@@ -71,7 +72,7 @@ def all_directories(path):
     allfiles = []
     curpath = path
     for d in os.listdir(path):
-        if not(os.path.isdir(os.path.join(source, d))):
+        if not(os.path.isdir(os.path.join(curpath, d))):
             allfiles.append(os.path.join(curpath, d))
         else:
             allfiles+=all_directories(os.path.join(curpath, d))
@@ -94,15 +95,22 @@ def getfiles(source):
             for d in dirs:
                 addedcontents.append(hashlib.md5(open(d,"r").read().encode()).hexdigest())
                 dirpaths.append(d[(len(source)+1):])
-    print(dirpaths)
         
 
     count = 0
     while True:
         allfilenames = [f for f in os.listdir(source) if not(os.path.isdir(os.path.join(source, f)))]
+        for f in os.listdir(source):
+            if os.path.isdir(os.path.join(source, f)):
+                dirs = all_directories(os.path.join(source,f))
+                for d in dirs:
+                    if d[(len(source)+1):] not in dirpaths:
+                        dirpaths.append(d[(len(source)+1):])
+
         allfilenames+=dirpaths
 
         newfiles = [f for f in allfilenames if f not in addedfiles]
+
         if len(newfiles)!=0: print(f"New files: {newfiles}")
 
         for i, f in enumerate(addedfiles):
