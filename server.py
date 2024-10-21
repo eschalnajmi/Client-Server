@@ -1,6 +1,7 @@
 import os
 import socket
 import sys
+from threading import Thread
 
 def getdir():
     '''
@@ -23,6 +24,32 @@ def getdir():
             
     return destination, addedfiles
 
+def RunServer(destination, addedfiles, client, addr):
+    while True:
+        filename = client.recv(4096).decode()
+        if filename == "": break
+        file = open(os.path.join(destination, filename),"w")
+        client.send("Success".encode())
+
+        iterations = int(client.recv(4096).decode())
+        client.send("Success".encode())
+    
+        contents = ""
+        for i in range(iterations):
+            recvcontents = client.recv(4096).decode()
+            if recvcontents != f"\0":
+                contents += recvcontents
+            else:
+                contents = f"\0"
+                break
+        
+        file.write(contents)
+        file.close()
+        client.send("Success".encode())
+
+        addedfiles.append(filename)
+    client.close()
+
 def connect(destination,addedfiles):
     '''
     Connects to the client and receives files from the client.
@@ -34,33 +61,16 @@ def connect(destination,addedfiles):
     server.listen(5)
 
     while True:
-        client, addr = server.accept()
-
-        while True:
-            filename = client.recv(4096).decode()
-            if filename == "": break
-            file = open(os.path.join(destination, filename),"w")
-            client.send("Success".encode())
-
-            iterations = int(client.recv(4096).decode())
-            client.send("Success".encode())
-        
-            contents = ""
-            for i in range(iterations):
-                recvcontents = client.recv(4096).decode()
-                if recvcontents != f"\0":
-                    contents += recvcontents
-                else:
-                    contents = f"\0"
-                    break
-            
-            file.write(contents)
-            file.close()
-            client.send("Success".encode())
-
-            addedfiles.append(filename)
-
-        client.close()
+        try:
+            client, addr = server.accept()
+            thread = Thread(target=RunServer, args=(destination, addedfiles, client, addr))
+            thread.start()
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+    
+    client.close()
+    thread.join()
         
 if __name__ == "__main__":
     destination, addedfiles = getdir()
