@@ -25,6 +25,13 @@ def getdir():
     return destination, addedfiles
 
 def RunServer(destination, addedfiles, client, addr):
+    '''
+    Actual server code that receives files from the client.
+    :param destination: destination directory path
+    :param addedfiles: list of files already in the directory
+    :param client: client socket
+    :param addr: client address
+    '''
     while True:
         filename = client.recv(4096).decode()
         if filename == "": break
