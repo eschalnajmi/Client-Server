@@ -42,9 +42,19 @@ def connect(destination,addedfiles):
             file = open(os.path.join(destination, filename),"w")
             client.send("Success".encode())
 
-            contents = client.recv(4096).decode()
-            if contents != f"\0":
-                file.write(contents)
+            iterations = int(client.recv(4096).decode())
+            client.send("Success".encode())
+        
+            contents = ""
+            for i in range(iterations):
+                recvcontents = client.recv(4096).decode()
+                if recvcontents != f"\0":
+                    contents += recvcontents
+                else:
+                    contents = f"\0"
+                    break
+            
+            file.write(contents)
             file.close()
             client.send("Success".encode())
 

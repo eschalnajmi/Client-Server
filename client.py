@@ -27,6 +27,8 @@ def sendfiles(newfiles, source):
     client.connect(('0.0.0.0',8080))
 
     for f in newfiles:
+        iterations = 1
+
         client.send(f"{f}".encode())
 
         server_msg = client.recv(4096).decode()
@@ -39,6 +41,15 @@ def sendfiles(newfiles, source):
         if contents == "":
             contents = f"\0"
 
+        if sys.getsizeof(contents) > 4096:
+            iterations = sys.getsizeof(contents)//4096 + 1
+
+        client.send(f"{iterations}".encode())
+        server_msg = client.recv(4096).decode()
+        if server_msg != "Success":
+            print(f"Error with file {f}")
+            return []
+        
         client.send(f"{contents}".encode())
         server_msg = client.recv(4096).decode()
         if server_msg != "Success":
