@@ -1,19 +1,18 @@
 import os
 import socket
 import hashlib
+import sys
 
 def getdir():
     '''
-    Gets the source directory path from the user, if invalid path is entered, prompts the user to enter again.
+    Gets the source directory path from the user, if no path entered it returns the current working directory.
     :return: source directory path
     '''
-    while True:
-        source = input("Enter the source directory path: ")
-
-        if os.path.exists(source):
-            return source
-        
-        print("Invalid path. Please try again.")
+    if len(sys.argv) < 2:
+        source = os.getcwd()
+        return source
+    
+    return sys.argv[1]
 
 def sendfiles(newfiles, source):
     '''
@@ -61,13 +60,15 @@ def getfiles(source):
     addedcontents=[] # stores hash of added contents
 
     for f in os.listdir(source):
-        addedcontents.append(hashlib.md5(open(os.path.join(source, f),"r").read().encode()).hexdigest())
+        if not(os.path.isdir(os.path.join(source, f))):
+            addedcontents.append(hashlib.md5(open(os.path.join(source, f),"r").read().encode()).hexdigest())
 
     count = 0
     while True:
-        allfilenames = os.listdir(source) 
+        allfilenames = [f for f in os.listdir(source) if not(os.path.isdir(os.path.join(source, f)))]
 
         newfiles = [f for f in allfilenames if f not in addedfiles]
+        if len(newfiles)!=0: print(f"New files: {newfiles}")
 
         for i, f in enumerate(addedfiles):
             if hashlib.md5(open(os.path.join(source, f),"r").read().encode()).hexdigest() != addedcontents[i]:

@@ -1,5 +1,6 @@
 import os
 import socket
+import sys
 
 def getdir():
     '''
@@ -7,13 +8,18 @@ def getdir():
     :return: destination directory path and list of files already in the directory
     '''
     addedfiles = []
-    destination = input("Enter the destination directory path: ")
+    if len(sys.argv) < 2:
+        destination = "destination"
+    else:
+        destination = sys.argv[1]
 
     if not(os.path.exists(destination)):
         os.mkdir(destination)
         print(f"Created directory {destination}\n\n")
     else:
-        addedfiles += os.listdir(destination) 
+        for f in os.listdir(destination):
+            if not(os.path.isdir(os.path.join(destination, f))):
+                addedfiles.append(f)
             
     return destination, addedfiles
 
@@ -29,7 +35,6 @@ def connect(destination,addedfiles):
 
     while True:
         client, addr = server.accept()
-        print(f"Connection from {addr}")
 
         while True:
             filename = client.recv(4096).decode()
