@@ -2,6 +2,10 @@ import os
 import socket
 
 def getdir():
+    '''
+    Gets the destination directory path from the user.
+    :return: destination directory path and list of files already in the directory
+    '''
     addedfiles = []
     destination = input("Enter the destination directory path: ")
 
@@ -14,6 +18,11 @@ def getdir():
     return destination, addedfiles
 
 def connect(destination,addedfiles):
+    '''
+    Connects to the client and receives files from the client.
+    :param destination: destination directory path
+    :param addedfiles: list of files already in the directory
+    '''
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(('0.0.0.0',8080))
     server.listen(5)
@@ -26,17 +35,14 @@ def connect(destination,addedfiles):
             filename = client.recv(4096).decode()
             if filename == "": break
             file = open(os.path.join(destination, filename),"w")
-            print(f"Created file {filename}")
             client.send("Success".encode())
 
             contents = client.recv(4096).decode()
             if contents != f"\0":
                 file.write(contents)
             file.close()
-            print(f"Written contents {filename}")
             client.send("Success".encode())
 
-            print(f"Received file {filename}\n\n")
             addedfiles.append(filename)
 
         client.close()
